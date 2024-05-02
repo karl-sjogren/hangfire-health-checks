@@ -1,4 +1,4 @@
-using Hangfire.Storage;
+using Hangfire;
 using Karls.HealthChecks.Hangfire;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -32,7 +32,7 @@ public static class HealthCheckBuilderExtensions {
 
         return builder.Add(new HealthCheckRegistration(
             name ?? _defaultName,
-            sp => new HangfireHealthCheck(hangfireOptionsBuilder.Build(), sp.GetService<IMonitoringApi>()!),
+            sp => new HangfireHealthCheck(hangfireOptionsBuilder.Build(), sp.GetService<JobStorage>()?.GetMonitoringApi()!),
             failureStatus,
             tags,
             timeout));
