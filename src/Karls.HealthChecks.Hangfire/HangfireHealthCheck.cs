@@ -58,7 +58,7 @@ internal class HangfireHealthCheck : IHealthCheck {
                 return Task.FromResult(new HealthCheckResult(context.Registration.FailureStatus, description: string.Join(" + ", errors)));
             }
 
-            return Task.FromResult(new HealthCheckResult(HealthStatus.Healthy, "Successfully queried the on premise API for job status."));
+            return Task.FromResult(new HealthCheckResult(HealthStatus.Healthy, "Successfully checked Hangfire and found no discrepancies."));
         } catch(Exception ex) {
             return Task.FromResult(new HealthCheckResult(context.Registration.FailureStatus, exception: ex));
         }
