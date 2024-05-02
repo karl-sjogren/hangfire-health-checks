@@ -63,4 +63,60 @@ public class HangfireHealthCheckTests {
 
         result.Status.ShouldBe(HealthStatus.Unhealthy);
     }
+
+    [Fact]
+    public async Task CheckHealth_WhenCalledWithQueues_ShouldReturnUnhealthyAsync() {
+        var monitoringApi = A.Dummy<IMonitoringApi>();
+
+        var hangfireOptions = new HangfireOptions();
+        hangfireOptions.AddQueueCheck("queue1", 1);
+
+        var context = new HealthCheckContext {
+            Registration = new HealthCheckRegistration("Hangfire", A.Dummy<IHealthCheck>(), HealthStatus.Degraded, null)
+        };
+
+        A.CallTo(() => monitoringApi.EnqueuedCount("queue1")).Returns(2);
+
+        var healthCheck = new HangfireHealthCheck(hangfireOptions, monitoringApi);
+
+        var result = await healthCheck.CheckHealthAsync(context, CancellationToken.None);
+
+        result.Status.ShouldBe(HealthStatus.Degraded);
+    }
+
+    [Fact]
+    public async Task CheckHealth_WhenCalledWithMaximumTotalQueuedJobs_ShouldReturnUnhealthyAsync() {
+        var monitoringApi = A.Dummy<IMonitoringApi>();
+
+        var hangfireOptions = new HangfireOptions {
+            MaximumTotalQueuedJobs = 10
+        };
+
+        var context = new HealthCheckContext {
+            Registration = new HealthCheckRegistration("Hangfire", A.Dummy<IHealthCheck>(), HealthStatus.Unhealthy, null)
+        };
+
+        A.CallTo(() => monitoringApi.Queues())
+            .Returns([
+                new QueueWithTopEnqueuedJobsDto {
+                    Name = "queue1",
+                    Length = 2
+                },
+                new QueueWithTopEnqueuedJobsDto {
+                    Name = "queue2",
+                    Length = 6
+                },
+                new QueueWithTopEnqueuedJobsDto {
+                    Name = "queue3",
+                    Length = 6
+                }
+            ]
+        );
+
+        var healthCheck = new HangfireHealthCheck(hangfireOptions, monitoringApi);
+
+        var result = await healthCheck.CheckHealthAsync(context, CancellationToken.None);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+    }
 }

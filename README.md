@@ -23,13 +23,12 @@ an endpoint for health checks.
 public void ConfigureServices(IServiceCollection services) {
     services.AddHealthChecks(builder =>
         builder
-            .AddHangfireCheck("Hangfire", hangfireBuilder =>
-                hangfireBuilder
-                    .MaximumJobsFailed(1)
+            .AddHangfireCheck("Hangfire", optionsBuilder =>
+                optionsBuilder
                     .MinimumAvailableServers(1)
-                    .AddJobQueueCheck("SpecialQueue", maximumQueuedJobs: 10)
-                ),
-                HealthStatus.Degraded
+                    .MaximumJobsFailed(1)
+                    .AddJobQueueCheck("SpecialQueue", maximumQueuedJobs: 10),
+                HealthStatus.Degraded);
     );
 }
 ```
