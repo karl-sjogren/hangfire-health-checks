@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Karls.HealthChecks.Hangfire\Karls.HealthChecks.Hangfire.csproj" />
+  </ItemGroup>
+
+</Project>
